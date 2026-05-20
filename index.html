@@ -61,21 +61,21 @@
       position: fixed; inset: 0;
       pointer-events: none;
       z-index: 0;
+      overflow: hidden;
     }
+    
     .bg-photo {
       position: absolute;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover; /* Makes the photo fill the screen */
+      border-radius: 30px;
+      object-fit: cover;
       opacity: 0; /* Hidden by default */
-      filter: blur(8px) grayscale(10%); /* Soft and dreamy */
-      /* 6-second ultra-smooth fade in/out, plus a tiny, imperceptible 20s zoom */
-      transition: opacity 6s ease-in-out, transform 20s linear; 
-      transform: scale(1);
+      filter: blur(4px) grayscale(15%); 
+      transition: opacity 6s ease-in-out; /* 6-second slow fade */
+      animation: photoDrift 40s infinite alternate ease-in-out; /* Slow wandering motion */
     }
+    
     .bg-photo.active {
-      opacity: 0.25; /* Adjust this from 0.15 to 0.40 if you still need it brighter! */
-      transform: scale(1.05); /* Very slow zoom while visible */
+      opacity: 0.25; /* Visible but dreamy. Adjust up to 0.40 if needed! */
     }
 
     @keyframes drift {
@@ -85,7 +85,7 @@
     
     @keyframes photoDrift {
       from { transform: translate(0,0) scale(1); }
-      to   { transform: translate(4vw, 4vh) scale(1.05); }
+      to   { transform: translate(5vw, 6vh) scale(1.05); }
     }
 
     /* ── Page layout ── */
@@ -661,6 +661,7 @@ volumeBar.style.setProperty('--vol', '80%');
 
 // ─── Background Photos Initialization ──────────────────────────────────────
 // ─── Background Photos Initialization (Sequential Crossfade) ───────────────
+// ─── Background Photos Initialization (Single Floating Crossfade) ──────────
 function initPhotos() {
   const photoLayer = document.getElementById('photo-layer');
   let currentPhotoIndex = 0;
@@ -678,22 +679,39 @@ function initPhotos() {
   if (photoElements.length === 0) return;
 
   function cyclePhoto() {
-    // 1. Tell all photos to fade out
-    photoElements.forEach(el => el.classList.remove('active'));
+    // 1. Tell the current photo to fade out
+    if (photoElements[currentPhotoIndex]) {
+      photoElements[currentPhotoIndex].classList.remove('active');
+    }
 
-    // 2. Tell the current photo to fade in
-    photoElements[currentPhotoIndex].classList.add('active');
-
-    // 3. Move to the next photo in the list, loop back to 0 at the end
+    // 2. Move to the next photo in the list
     currentPhotoIndex = (currentPhotoIndex + 1) % photoElements.length;
+    const nextPhoto = photoElements[currentPhotoIndex];
+
+    // 3. Give the new photo a random position and size BEFORE it fades in
+    // Keeping it between 250px and 450px wide
+    nextPhoto.style.width = Math.floor(Math.random() * 200 + 250) + 'px';
+    nextPhoto.style.height = nextPhoto.style.width; // Keeps it square-ish
+    
+    // Positioning so it doesn't spawn entirely off-screen
+    nextPhoto.style.top = Math.floor(Math.random() * 50) + 'vh'; 
+    nextPhoto.style.left = Math.floor(Math.random() * 60) + 'vw';
+
+    // 4. Trigger the fade-in
+    nextPhoto.classList.add('active');
   }
 
-  // Start the first photo immediately
-  cyclePhoto();
+  // Initialize the very first photo immediately
+  const firstPhoto = photoElements[0];
+  firstPhoto.style.width = '350px';
+  firstPhoto.style.height = '350px';
+  firstPhoto.style.top = '20vh';
+  firstPhoto.style.left = '10vw';
+  firstPhoto.classList.add('active');
 
-  // Change the photo every 15 seconds (15000 ms)
-  // (6s to fade in, 3s hold full visibility, 6s fade out as the next begins)
-  setInterval(cyclePhoto, 15000);
+  // Swap to a new photo every 12 seconds
+  // (6s to fade in, wait, then it starts fading out as the next one fades in)
+  setInterval(cyclePhoto, 12000);
 }
 
 // ─── Starfield ─────────────────────────────────────────────────────────────
