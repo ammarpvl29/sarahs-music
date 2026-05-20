@@ -64,11 +64,18 @@
     }
     .bg-photo {
       position: absolute;
-      border-radius: 30px;
-      opacity: 0.15; /* Increased from 4% to 15% to make them visible */
-      filter: blur(4px) grayscale(15%); /* Reduced blur slightly for better shape recognition */
-      animation: photoDrift 120s infinite alternate ease-in-out;
-      object-fit: cover;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover; /* Makes the photo fill the screen */
+      opacity: 0; /* Hidden by default */
+      filter: blur(8px) grayscale(10%); /* Soft and dreamy */
+      /* 6-second ultra-smooth fade in/out, plus a tiny, imperceptible 20s zoom */
+      transition: opacity 6s ease-in-out, transform 20s linear; 
+      transform: scale(1);
+    }
+    .bg-photo.active {
+      opacity: 0.25; /* Adjust this from 0.15 to 0.40 if you still need it brighter! */
+      transform: scale(1.05); /* Very slow zoom while visible */
     }
 
     @keyframes drift {
@@ -653,21 +660,40 @@ volumeBar.addEventListener('input', () => {
 volumeBar.style.setProperty('--vol', '80%');
 
 // ─── Background Photos Initialization ──────────────────────────────────────
+// ─── Background Photos Initialization (Sequential Crossfade) ───────────────
 function initPhotos() {
   const photoLayer = document.getElementById('photo-layer');
-  PHOTOS.forEach((photoSrc, index) => {
+  let currentPhotoIndex = 0;
+  let photoElements = [];
+
+  // Create all image elements first
+  PHOTOS.forEach((photoSrc) => {
     const img = document.createElement('img');
     img.src = photoSrc;
     img.className = 'bg-photo';
-    
-    img.style.top = Math.floor(Math.random() * 60) + 'vh';
-    img.style.left = Math.floor(Math.random() * 60) + 'vw';
-    img.style.width = Math.floor(Math.random() * 200 + 300) + 'px'; 
-    img.style.height = img.style.width; 
-    img.style.animationDelay = (index * -30) + 's'; 
-    
     photoLayer.appendChild(img);
+    photoElements.push(img);
   });
+
+  if (photoElements.length === 0) return;
+
+  function cyclePhoto() {
+    // 1. Tell all photos to fade out
+    photoElements.forEach(el => el.classList.remove('active'));
+
+    // 2. Tell the current photo to fade in
+    photoElements[currentPhotoIndex].classList.add('active');
+
+    // 3. Move to the next photo in the list, loop back to 0 at the end
+    currentPhotoIndex = (currentPhotoIndex + 1) % photoElements.length;
+  }
+
+  // Start the first photo immediately
+  cyclePhoto();
+
+  // Change the photo every 15 seconds (15000 ms)
+  // (6s to fade in, 3s hold full visibility, 6s fade out as the next begins)
+  setInterval(cyclePhoto, 15000);
 }
 
 // ─── Starfield ─────────────────────────────────────────────────────────────
