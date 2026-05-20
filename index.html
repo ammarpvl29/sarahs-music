@@ -69,13 +69,13 @@
       border-radius: 30px;
       object-fit: cover;
       opacity: 0; /* Hidden by default */
-      filter: blur(4px) grayscale(15%); 
+      filter: grayscale(15%); /* Removed the blur! Just a little muted color */
       transition: opacity 6s ease-in-out; /* 6-second slow fade */
       animation: photoDrift 40s infinite alternate ease-in-out; /* Slow wandering motion */
     }
     
     .bg-photo.active {
-      opacity: 0.25; /* Visible but dreamy. Adjust up to 0.40 if needed! */
+      opacity: 0.25; /* Change this to 0.35 or 0.40 if you want the clear photo to be brighter! */
     }
 
     @keyframes drift {
