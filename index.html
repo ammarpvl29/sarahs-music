@@ -659,9 +659,7 @@ volumeBar.addEventListener('input', () => {
 });
 volumeBar.style.setProperty('--vol', '80%');
 
-// ─── Background Photos Initialization ──────────────────────────────────────
-// ─── Background Photos Initialization (Sequential Crossfade) ───────────────
-// ─── Background Photos Initialization (Single Floating Crossfade) ──────────
+// ─── Background Photos Initialization (Avoid Center) ──────────
 function initPhotos() {
   const photoLayer = document.getElementById('photo-layer');
   let currentPhotoIndex = 0;
@@ -684,33 +682,41 @@ function initPhotos() {
       photoElements[currentPhotoIndex].classList.remove('active');
     }
 
-    // 2. Move to the next photo in the list
+    // 2. Move to the next photo
     currentPhotoIndex = (currentPhotoIndex + 1) % photoElements.length;
     const nextPhoto = photoElements[currentPhotoIndex];
 
-    // 3. Give the new photo a random position and size BEFORE it fades in
-    // Keeping it between 250px and 450px wide
-    nextPhoto.style.width = Math.floor(Math.random() * 200 + 250) + 'px';
-    nextPhoto.style.height = nextPhoto.style.width; // Keeps it square-ish
+    // 3. Set a random size
+    nextPhoto.style.width = Math.floor(Math.random() * 150 + 250) + 'px';
+    nextPhoto.style.height = nextPhoto.style.width; 
     
-    // Positioning so it doesn't spawn entirely off-screen
-    nextPhoto.style.top = Math.floor(Math.random() * 50) + 'vh'; 
-    nextPhoto.style.left = Math.floor(Math.random() * 60) + 'vw';
+    // 4. Flip a coin to choose the Left side or Right side (avoiding the middle!)
+    const isLeftSide = Math.random() < 0.5;
+    
+    if (isLeftSide) {
+      // Spawn on the left: between 2vw and 15vw
+      nextPhoto.style.left = Math.floor(Math.random() * 13 + 2) + 'vw';
+    } else {
+      // Spawn on the right: between 65vw and 75vw
+      nextPhoto.style.left = Math.floor(Math.random() * 10 + 65) + 'vw';
+    }
 
-    // 4. Trigger the fade-in
+    // Vertical position: safely between near the top and middle-bottom
+    nextPhoto.style.top = Math.floor(Math.random() * 50 + 5) + 'vh';
+
+    // 5. Trigger the fade-in
     nextPhoto.classList.add('active');
   }
 
-  // Initialize the very first photo immediately
+  // Initialize the very first photo immediately (tucked safely on the left)
   const firstPhoto = photoElements[0];
-  firstPhoto.style.width = '350px';
-  firstPhoto.style.height = '350px';
+  firstPhoto.style.width = '300px';
+  firstPhoto.style.height = '300px';
   firstPhoto.style.top = '20vh';
-  firstPhoto.style.left = '10vw';
+  firstPhoto.style.left = '8vw';
   firstPhoto.classList.add('active');
 
   // Swap to a new photo every 12 seconds
-  // (6s to fade in, wait, then it starts fading out as the next one fades in)
   setInterval(cyclePhoto, 12000);
 }
 
